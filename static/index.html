@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CityWalk - 智能徒步路线搜索平台</title>
+    <link rel="stylesheet" href="/static/css/base.css">
+    <link rel="stylesheet" href="/static/css/routes.css">
+    <link rel="stylesheet" href="/static/css/chat.css">
+</head>
+<body>
+    <div id="app">
+        <nav>
+            <div class="logo" onclick="navigate('routes')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+                </svg>
+                CityWalk
+            </div>
+            <div class="nav-links">
+                <a data-page="routes" class="active" onclick="navigate('routes')">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:4px"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                    路线发现
+                </a>
+                <a data-page="chat" onclick="navigate('chat')">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:4px"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+                    智能助手
+                </a>
+            </div>
+        </nav>
+
+        <div id="page-routes" class="page active">
+            <div class="routes-page">
+                <div class="routes-toolbar">
+                    <div class="search-box">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                        <input type="text" id="route-search" placeholder="搜索路线名称或描述..." oninput="debounceSearch()">
+                    </div>
+                    <select id="filter-city" onchange="loadRoutes()">
+                        <option value="">全部城市</option>
+                        <option value="北京">北京</option>
+                        <option value="上海">上海</option>
+                        <option value="杭州">杭州</option>
+                        <option value="成都">成都</option>
+                        <option value="深圳">深圳</option>
+                    </select>
+                    <select id="filter-difficulty" onchange="loadRoutes()">
+                        <option value="">全部难度</option>
+                        <option value="easy">简单</option>
+                        <option value="moderate">中等</option>
+                        <option value="hard">困难</option>
+                        <option value="expert">专家</option>
+                    </select>
+                </div>
+                <div class="routes-content" id="routes-content">
+                    <div class="routes-grid" id="routes-grid"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="page-chat" class="page">
+            <div class="chat-page">
+                <div class="chat-container">
+                    <div class="chat-messages" id="chat-messages">
+                        <div class="chat-welcome" id="chat-welcome">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+                            </svg>
+                            <h2>你好，我是 CityWalk 智能助手</h2>
+                            <p>我可以帮你搜索徒步路线、推荐适合的路线、回答路线相关问题</p>
+                            <div class="quick-actions">
+                                <div class="quick-action" onclick="sendQuickAction('推荐一条杭州的简单路线')">推荐杭州简单路线</div>
+                                <div class="quick-action" onclick="sendQuickAction('北京有哪些适合看日出的路线？')">北京日出路线</div>
+                                <div class="quick-action" onclick="sendQuickAction('适合亲子出行的路线有哪些？')">亲子路线推荐</div>
+                                <div class="quick-action" onclick="sendQuickAction('成都有什么有挑战性的路线？')">成都挑战路线</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chat-input-area">
+                        <div class="chat-input-wrapper">
+                            <textarea id="chat-input" placeholder="输入你的问题，如：推荐一条适合新手的杭州路线..." rows="1" onkeydown="handleInputKey(event)" oninput="autoResize(this)"></textarea>
+                            <button class="send-btn" id="send-btn" onclick="sendMessage()">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-overlay" id="route-modal">
+            <div class="modal">
+                <div class="modal-header">
+                    <h2 id="modal-title">路线详情</h2>
+                    <button class="modal-close" onclick="closeModal()">&times;</button>
+                </div>
+                <div class="modal-body" id="modal-body"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/api.js"></script>
+    <script src="/static/js/routes.js"></script>
+    <script src="/static/js/chat.js"></script>
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>路线地图 - CityWalk</title>
+    <link rel="stylesheet" href="/static/css/base.css?v=3">
+    <link rel="stylesheet" href="/static/css/map.css?v=3">
+</head>
+<body>
+    <div class="full-map-page">
+        <div class="full-map-toolbar">
+            <a href="/" class="back-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                返回
+            </a>
+            <h2 id="map-route-name">加载中...</h2>
+            <span class="badge" id="map-difficulty-badge" style="margin-right:8px"></span>
+            <div class="route-stats-inline">
+                <span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                    <span id="map-distance">-</span> km
+                </span>
+                <span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+                    <span id="map-elevation">-</span> m
+                </span>
+                <span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    <span id="map-duration">-</span> h
+                </span>
+            </div>
+        </div>
+        <div class="full-map-poi-bar" id="poi-bar" style="display:none">
+            <div class="poi-bar-label">沿途景点</div>
+            <div class="poi-bar-list" id="poi-bar-list"></div>
+        </div>
+        <div class="full-map-canvas" id="full-map-canvas"></div>
+    </div>
+
+    <script>window._AMapSecurityConfig = { securityJsCode: 'f5a8934d0a2907884da9fbe7efdbe449' };</script>
+    <script src="https://webapi.amap.com/maps?v=2.0&key=37c10a3ec8837f0cf57ef6ddb6de639c"></script>
+    <script src="/static/js/api.js?v=3"></script>
+    <script src="/static/js/map.js?v=3"></script>
+    <script>
+        const pathParts = window.location.pathname.split('/');
+        const routeId = pathParts[pathParts.length - 1];
+
+        const DIFFICULTY_MAP = {
+            easy: { label: '简单', class: 'badge-easy' },
+            moderate: { label: '中等', class: 'badge-moderate' },
+            hard: { label: '困难', class: 'badge-hard' },
+            expert: { label: '专家', class: 'badge-expert' },
+        };
+
+        async function init() {
+            if (!routeId) {
+                document.getElementById('map-route-name').textContent = '缺少路线 ID';
+                return;
+            }
+
+            try {
+                const route = await fetchRouteDetail(routeId);
+
+                document.getElementById('map-route-name').textContent = route.name;
+                document.title = route.name + ' - CityWalk';
+
+                const diff = DIFFICULTY_MAP[route.difficulty] || { label: route.difficulty, class: '' };
+                const badge = document.getElementById('map-difficulty-badge');
+                badge.textContent = diff.label;
+                badge.className = 'badge ' + diff.class;
+
+                document.getElementById('map-distance').textContent = route.distance_km;
+                document.getElementById('map-elevation').textContent = route.elevation_gain_m || 0;
+                document.getElementById('map-duration').textContent = route.duration_hours || '-';
+
+                const gpxPoints = route.gpx_points || [];
+                initFullMap('full-map-canvas', gpxPoints, {
+                    name: route.name,
+                    city: route.city,
+                    pois: route.pois,
+                });
+
+                if (route.pois && route.pois.length > 0) {
+                    var poiBar = document.getElementById('poi-bar');
+                    var poiList = document.getElementById('poi-bar-list');
+                    poiBar.style.display = 'flex';
+                    poiList.innerHTML = route.pois.map(function(p) {
+                        return '<span class="poi-bar-item" onclick="focusPOI(\'' + p.replace(/'/g, "\\'") + '\')">' + p + '</span>';
+                    }).join('');
+                }
+            } catch (err) {
+                document.getElementById('map-route-name').textContent = '加载失败: ' + err.message;
+            }
+        }
+
+        init();
+    </script>
+</body>
+</html>

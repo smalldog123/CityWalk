@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     OPENAI_API_KEY: str = ""
     OPENAI_MODEL: str = "gpt-4o"
     OPENAI_BASE_URL: str = "https://api.openai.com/v1"
+    OPENAI_PROXY: str = ""
     APP_HOST: str = "0.0.0.0"
     APP_PORT: int = 8000
     DEBUG: bool = True

@@ -32,6 +32,7 @@ class RouteCreate(BaseModel):
     gpx_points: list[GPSPoint] = Field(default_factory=list)
     pois: list[str] = Field(default_factory=list)
     cover_image: Optional[str] = None
+    images: list[str] = Field(default_factory=list)
 
 
 class RouteResponse(RouteCreate):
@@ -52,3 +53,23 @@ class RouteSearchQuery(BaseModel):
     keyword: Optional[str] = None
     limit: int = 10
     offset: int = 0
+
+
+class GPXUploadRequest(BaseModel):
+    name: str
+    parsed_name: Optional[str] = None
+    city: Optional[str] = None
+    difficulty: Optional[DifficultyLevel] = None
+    description: Optional[str] = None
+    tags: list[str] = Field(default_factory=list)
+    gpx_points: list[GPSPoint]
+
+
+class TrackUploadRequest(BaseModel):
+    name: str
+    city: Optional[str] = None
+    difficulty: Optional[DifficultyLevel] = None
+    description: Optional[str] = None
+    tags: list[str] = Field(default_factory=list)
+    gpx_points: list[GPSPoint]
+    images: list[str] = Field(default_factory=list)

@@ -1,8 +1,9 @@
 from __future__ import annotations
 from typing import Optional, Any
 from datetime import datetime
+from math import radians, sin, cos, sqrt, atan2
 from app.core.database import get_database
-from app.models.route import RouteCreate, RouteSearchQuery, DifficultyLevel
+from app.models.route import RouteCreate, RouteSearchQuery, DifficultyLevel, GPSPoint, GPXUploadRequest, TrackUploadRequest
 from bson import ObjectId
 
 
@@ -89,6 +90,100 @@ class RouteService:
                     results.append(_route_helper(kw_match))
                     break
         return results
+
+    def _haversine_distance(self, lat1: float, lng1: float, lat2: float, lng2: float) -> float:
+        R = 6371
+        dlat = radians(lat2 - lat1)
+        dlng = radians(lng2 - lng1)
+        a = sin(dlat / 2) ** 2 + cos(radians(lat1)) * cos(radians(lat2)) * sin(dlng / 2) ** 2
+        c = 2 * atan2(sqrt(a), sqrt(1 - a))
+        return R * c
+
+    def _calc_gpx_stats(self, points: list[GPSPoint]) -> dict:
+        total_distance = 0.0
+        total_gain = 0.0
+        total_loss = 0.0
+        prev_elevation = None
+
+        for i in range(1, len(points)):
+            p1 = points[i - 1]
+            p2 = points[i]
+            total_distance += self._haversine_distance(p1.lat, p1.lng, p2.lat, p2.lng)
+
+            if p1.elevation is not None and p2.elevation is not None:
+                diff = p2.elevation - p1.elevation
+                if diff > 0:
+                    total_gain += diff
+                else:
+                    total_loss += abs(diff)
+
+        duration = None
+        if len(points) >= 2:
+            first_time = points[0].timestamp
+            last_time = points[-1].timestamp
+            if first_time and last_time:
+                try:
+                    dt = last_time - first_time
+                    duration = round(dt.total_seconds() / 3600, 1)
+                except Exception:
+                    pass
+
+        if duration is None:
+            duration = round(total_distance / 4.0, 1)
+
+        return {
+            "distance_km": round(total_distance, 2),
+            "elevation_gain_m": round(total_gain, 1),
+            "elevation_loss_m": round(total_loss, 1),
+            "duration_hours": duration,
+        }
+
+    async def create_from_gpx(self, data: GPXUploadRequest) -> dict:
+        stats = self._calc_gpx_stats(data.gpx_points)
+
+        difficulty = data.difficulty or DifficultyLevel.MODERATE
+        if stats["distance_km"] > 30 or stats["elevation_gain_m"] > 2000:
+            difficulty = DifficultyLevel.EXPERT
+        elif stats["distance_km"] > 20 or stats["elevation_gain_m"] > 1000:
+            difficulty = DifficultyLevel.HARD
+
+        route = RouteCreate(
+            name=data.parsed_name or data.name,
+            city=data.city or "未知",
+            difficulty=difficulty,
+            distance_km=stats["distance_km"],
+            elevation_gain_m=stats["elevation_gain_m"],
+            elevation_loss_m=stats["elevation_loss_m"],
+            duration_hours=stats["duration_hours"],
+            description=data.description,
+            tags=data.tags,
+            gpx_points=data.gpx_points,
+        )
+        return await self.create_route(route)
+
+    async def create_from_track(self, data: TrackUploadRequest) -> dict:
+        stats = self._calc_gpx_stats(data.gpx_points)
+
+        difficulty = data.difficulty or DifficultyLevel.MODERATE
+        if stats["distance_km"] > 30 or stats["elevation_gain_m"] > 2000:
+            difficulty = DifficultyLevel.EXPERT
+        elif stats["distance_km"] > 20 or stats["elevation_gain_m"] > 1000:
+            difficulty = DifficultyLevel.HARD
+
+        route = RouteCreate(
+            name=data.name,
+            city=data.city or "未知",
+            difficulty=difficulty,
+            distance_km=stats["distance_km"],
+            elevation_gain_m=stats["elevation_gain_m"],
+            elevation_loss_m=stats["elevation_loss_m"],
+            duration_hours=stats["duration_hours"],
+            description=data.description,
+            tags=data.tags,
+            gpx_points=data.gpx_points,
+            images=data.images,
+        )
+        return await self.create_route(route)
 
     async def count_routes(self, query: RouteSearchQuery) -> int:
         collection = await self._get_collection()

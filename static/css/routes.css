@@ -1,5 +1,8 @@
 .routes-page {
+    display: flex;
+    flex-direction: column;
     flex: 1;
+    min-height: 0;
     overflow: hidden;
 }
 
@@ -92,7 +95,7 @@
 }
 
 .route-card-header {
-    height: 160px;
+    height: 200px;
     background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
     display: flex;
     align-items: center;
@@ -109,9 +112,111 @@
     background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
     top: -50%;
     left: -50%;
+    z-index: 0;
 }
 
-.route-card-header svg {
+.route-card-carousel {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    z-index: 1;
+}
+
+.carousel-slide {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    opacity: 0;
+    transition: opacity 0.6s ease;
+}
+
+.carousel-slide.active {
+    opacity: 1;
+}
+
+.carousel-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.35);
+    color: white;
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 5;
+    transition: background 0.2s;
+    line-height: 1;
+    padding: 0;
+}
+
+.carousel-nav:hover {
+    background: rgba(0, 0, 0, 0.6);
+}
+
+.carousel-prev {
+    left: 8px;
+}
+
+.carousel-next {
+    right: 8px;
+}
+
+.carousel-dots {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 6px;
+    z-index: 5;
+}
+
+.carousel-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.carousel-dot.active {
+    background: #fff;
+    transform: scale(1.2);
+}
+
+.route-card-default-cover {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    z-index: 1;
+}
+
+.route-card-default-cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.route-card-default-cover .fallback-icon {
+    width: 100%;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+}
+
+.route-card-default-cover .fallback-icon svg {
     width: 48px;
     height: 48px;
     color: rgba(255, 255, 255, 0.6);
@@ -121,6 +226,7 @@
     position: absolute;
     top: 12px;
     right: 12px;
+    z-index: 10;
 }
 
 .route-card-header .city-label {
@@ -134,6 +240,7 @@
     padding: 3px 10px;
     border-radius: 20px;
     backdrop-filter: blur(4px);
+    z-index: 10;
 }
 
 .route-card-body {

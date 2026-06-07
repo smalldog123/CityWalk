@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>记录路线 - CityWalk</title>
+    <link rel="stylesheet" href="/static/css/base.css?v=3">
+    <link rel="stylesheet" href="/static/css/track.css?v=1">
+</head>
+<body>
+    <div class="track-page">
+        <div class="track-toolbar">
+            <a href="/" class="back-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                返回
+            </a>
+            <h2>记录路线</h2>
+        </div>
+
+        <div class="track-body">
+            <div class="track-map-area">
+                <div class="track-map-canvas" id="track-map-canvas"></div>
+                <div class="track-status-bar" id="track-status-bar">
+                    <div class="status-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        <span id="track-duration">00:00:00</span>
+                    </div>
+                    <div class="status-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                        <span id="track-distance">0.00 km</span>
+                    </div>
+                    <div class="status-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                        <span id="track-points">0 点</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="track-sidebar">
+                <div class="track-form" id="track-form">
+                    <h3>路线信息</h3>
+                    <div class="form-group">
+                        <label>路线名称 <span class="required">*</span></label>
+                        <input type="text" id="track-name" placeholder="给路线起个名字" maxlength="50">
+                    </div>
+                    <div class="form-group">
+                        <label>所在城市 <span style="font-weight:400;color:var(--text-light);font-size:11px">（根据定位自动获取）</span></label>
+                        <input type="text" id="track-city" placeholder="等待自动定位..." readonly style="background:var(--bg-card);cursor:default">
+                    </div>
+                    <div class="form-group">
+                        <label>难度</label>
+                        <select id="track-difficulty">
+                            <option value="">自动判断</option>
+                            <option value="easy">简单</option>
+                            <option value="moderate">中等</option>
+                            <option value="hard">困难</option>
+                            <option value="expert">专家</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>路线描述</label>
+                        <textarea id="track-description" placeholder="描述一下这条路线的特色..." rows="3" maxlength="500"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>标签</label>
+                        <input type="text" id="track-tags" placeholder="用逗号分隔，如：城市漫步,夜景">
+                    </div>
+                    <div class="form-group">
+                        <label>路线照片</label>
+                        <div class="image-upload-area" id="image-upload-area">
+                            <input type="file" id="track-images" accept="image/*" multiple onchange="handleImageUpload(event)" style="display:none">
+                            <button type="button" class="image-upload-btn" onclick="document.getElementById('track-images').click()">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+                                选择图片
+                            </button>
+                            <div class="image-preview-list" id="image-preview-list"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="track-controls">
+                    <button class="track-btn track-btn-start" id="btn-start" onclick="startTracking()">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="8"/></svg>
+                        开始记录
+                    </button>
+                    <button class="track-btn track-btn-stop" id="btn-stop" onclick="stopTracking()" disabled>
+                        <svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
+                        结束记录
+                    </button>
+                    <button class="track-btn track-btn-upload" id="btn-upload" onclick="uploadTrack()" disabled>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                        上传路线
+                    </button>
+                </div>
+
+                <div class="track-upload-progress" id="track-upload-progress" style="display:none">
+                    <div class="loading-spinner"></div>
+                    <span id="track-upload-status">上传中...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>window._AMapSecurityConfig = { securityJsCode: 'f5a8934d0a2907884da9fbe7efdbe449' };</script>
+    <script src="https://webapi.amap.com/maps?v=2.0&key=37c10a3ec8837f0cf57ef6ddb6de639c"></script>
+    <script src="/static/js/api.js?v=3"></script>
+    <script src="/static/js/track.js?v=1"></script>
+</body>
+</html>

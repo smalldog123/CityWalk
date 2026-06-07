@@ -4,9 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CityWalk - 智能徒步路线搜索平台</title>
-    <link rel="stylesheet" href="/static/css/base.css">
-    <link rel="stylesheet" href="/static/css/routes.css">
-    <link rel="stylesheet" href="/static/css/chat.css">
+    <link rel="stylesheet" href="/static/css/base.css?v=3">
+    <link rel="stylesheet" href="/static/css/routes.css?v=3">
+    <link rel="stylesheet" href="/static/css/chat.css?v=3">
+    <link rel="stylesheet" href="/static/css/map.css?v=3">
 </head>
 <body>
     <div id="app">
@@ -25,6 +26,10 @@
                 <a data-page="chat" onclick="navigate('chat')">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:4px"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
                     智能助手
+                </a>
+                <a href="/track" onclick="">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:4px"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    记录路线
                 </a>
             </div>
         </nav>
@@ -51,6 +56,17 @@
                         <option value="hard">困难</option>
                         <option value="expert">专家</option>
                     </select>
+                    <div class="upload-area">
+                        <input type="file" id="gpx-upload" accept=".gpx" onchange="handleGPXUpload(event)">
+                        <button class="upload-btn" onclick="document.getElementById('gpx-upload').click()">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                            上传GPX
+                        </button>
+                        <span class="upload-progress" id="upload-progress">
+                            <span class="loading-spinner" style="width:14px;height:14px;border-width:1.5px"></span>
+                            <span id="upload-status">上传中...</span>
+                        </span>
+                    </div>
                 </div>
                 <div class="routes-content" id="routes-content">
                     <div class="routes-grid" id="routes-grid"></div>
@@ -89,19 +105,23 @@
         </div>
 
         <div class="modal-overlay" id="route-modal">
-            <div class="modal">
+            <div class="modal map-modal">
                 <div class="modal-header">
                     <h2 id="modal-title">路线详情</h2>
                     <button class="modal-close" onclick="closeModal()">&times;</button>
                 </div>
                 <div class="modal-body" id="modal-body"></div>
+                <div class="modal-map" id="modal-map"></div>
             </div>
         </div>
     </div>
 
-    <script src="/static/js/api.js"></script>
-    <script src="/static/js/routes.js"></script>
-    <script src="/static/js/chat.js"></script>
-    <script src="/static/js/app.js"></script>
+    <script>window._AMapSecurityConfig = { securityJsCode: 'f5a8934d0a2907884da9fbe7efdbe449' };</script>
+    <script src="https://webapi.amap.com/maps?v=2.0&key=37c10a3ec8837f0cf57ef6ddb6de639c"></script>
+    <script src="/static/js/api.js?v=3"></script>
+    <script src="/static/js/map.js?v=3"></script>
+    <script src="/static/js/routes.js?v=3"></script>
+    <script src="/static/js/chat.js?v=3"></script>
+    <script src="/static/js/app.js?v=3"></script>
 </body>
 </html>

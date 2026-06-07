@@ -3,6 +3,7 @@ import json
 import re
 import logging
 from typing import AsyncGenerator
+import httpx
 from openai import AsyncOpenAI, APITimeoutError, APIConnectionError, APIStatusError
 from app.core.config import get_settings
 from app.agent.tools import get_tools_definition
@@ -20,10 +21,15 @@ class AgentEngine:
 
     def __init__(self):
         self.settings = get_settings()
+        if self.settings.OPENAI_PROXY:
+            proxy = self.settings.OPENAI_PROXY
+            http_client = httpx.AsyncClient(proxy=proxy, timeout=60.0)
+        else:
+            http_client = httpx.AsyncClient(timeout=60.0, trust_env=False)
         self.client = AsyncOpenAI(
             api_key=self.settings.OPENAI_API_KEY,
             base_url=self.settings.OPENAI_BASE_URL,
-            timeout=60.0,
+            http_client=http_client,
         )
         self.tool_executor = ToolExecutor()
         self.context_builder = ContextBuilder()

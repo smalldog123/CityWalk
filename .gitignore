@@ -10,3 +10,5 @@ dist/
 build/
 .idea/
 .vscode/
+uploads/
+debug.log

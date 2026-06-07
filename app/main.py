@@ -14,6 +14,7 @@ from app.core.graph_db import close_falkordb
 from app.api import routes, agent, health
 
 STATIC_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "static")
+UPLOADS_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "uploads")
 
 
 @asynccontextmanager
@@ -49,6 +50,9 @@ app.include_router(health.router, prefix="/api/v1")
 
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
+os.makedirs(UPLOADS_DIR, exist_ok=True)
+app.mount("/uploads", StaticFiles(directory=UPLOADS_DIR), name="uploads")
+
 
 @app.get("/")
 async def serve_index():
@@ -63,6 +67,16 @@ async def serve_routes_page():
 @app.get("/chat")
 async def serve_chat_page():
     return FileResponse(os.path.join(STATIC_DIR, "index.html"))
+
+
+@app.get("/map/{route_id}")
+async def serve_map_page(route_id: str):
+    return FileResponse(os.path.join(STATIC_DIR, "map.html"))
+
+
+@app.get("/track")
+async def serve_track_page():
+    return FileResponse(os.path.join(STATIC_DIR, "track.html"))
 
 
 if __name__ == "__main__":
